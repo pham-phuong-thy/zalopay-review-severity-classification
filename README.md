@@ -121,8 +121,6 @@ zalopay-review-severity-classification/
 └── requirements.txt
 ```
 
-> 💡 Tip: the original uploaded filenames (`Base_Model_-_TF-IDF.ipynb`, `PhoBERT_Model.ipynb`, `ZaloPay_Data_processing.ipynb`, `_WDA__DASHBOARD.ipynb`) can simply be renamed to the numbered names above when you push them, so the pipeline order is obvious to anyone browsing the repo.
-
 ---
 
 ## 🛠️ Tech Stack
