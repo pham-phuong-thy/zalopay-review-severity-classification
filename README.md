@@ -111,10 +111,17 @@ zalopay-review-severity-classification/
 │   └── zalopay_dashboard.html        # Interactive dashboard (published via GitHub Pages)
 │
 ├── notebooks/
-│   ├── 01_data_processing.ipynb      # Scraping, cleaning, EDA, text preprocessing
-│   ├── 02_baseline_tfidf_logreg.ipynb# TF-IDF + Logistic Regression baseline
-│   └── 03_phobert_finetuning.ipynb   # PhoBERT fine-tuning, training & error analysis
+│   ├── 01_data_processing.ipynb       # Scraping, cleaning, EDA, text preprocessing
+│   ├── 02_baseline_tfidf_logreg.ipynb # TF-IDF + Logistic Regression baseline
+│   └── 03_phobert_finetuning.ipynb    # PhoBERT fine-tuning, training & error analysis
 │
+├── pipeline/
+│   ├── 01_data_collection.ipynb      
+│   ├── 02_text_cleaning.ipynb
+│   ├── 03_data_cleaning.ipynb      
+│   ├── 04_system_architecture.ipynb
+│   ├── 05_tfidf_logistic_regression_pipeline.ipynb
+│   └── 06_phobert_classification_pipeline.ipynb  
 │
 │
 ├── README.md
