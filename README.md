@@ -4,7 +4,6 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![PhoBERT](https://img.shields.io/badge/Model-PhoBERT--base--v2-orange.svg)](https://github.com/VinAIResearch/PhoBERT)
-[![License](https://img.shields.io/badge/License-Academic%20Project-lightgrey.svg)](#)
 
 🔗 **Live Dashboard:** https://pham-phuong-thy.github.io/zalopay-review-severity-classification/dashboard/zalopay_dashboard.html
 
@@ -114,13 +113,9 @@ zalopay-review-severity-classification/
 ├── notebooks/
 │   ├── 01_data_processing.ipynb      # Scraping, cleaning, EDA, text preprocessing
 │   ├── 02_baseline_tfidf_logreg.ipynb# TF-IDF + Logistic Regression baseline
-│   ├── 03_phobert_finetuning.ipynb   # PhoBERT fine-tuning, training & error analysis
-│   └── 04_dashboard_data_prep.ipynb  # Aggregating model outputs into dashboard-ready data
+│   └── 03_phobert_finetuning.ipynb   # PhoBERT fine-tuning, training & error analysis
 │
-├── report/
-│   └── ZaloPay_Severity_Classification_Report.docx   # Full academic report (Vietnamese)
 │
-├── docs/                              # (optional) exported figures / images used in the report
 │
 ├── README.md
 └── requirements.txt
@@ -160,15 +155,6 @@ Open the notebooks in order (`01` → `04`) to reproduce the full pipeline, or o
 - Build a real-time alerting pipeline for critical financial/security complaints.
 - Integrate the model into a customer support system for automatic triage and response suggestions.
 
----
-
-## 👥 Team
-
-| Student ID | Name | Contribution |
-|---|---|---|
-| K234131470 | Trần Thị Kim Chi (Team Lead) | Level 1 |
-| K234131474 | Huỳnh Thị Phương Dung | Level 1 |
-| K234131511 | Phạm Phương Thy | Level 1 |
 
 ---
 
