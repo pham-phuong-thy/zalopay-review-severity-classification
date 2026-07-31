@@ -1,0 +1,1103 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZaloPay – Dashboard Đánh giá Mức độ Hài lòng Khách hàng</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f6fa;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0052cc 0%, #0074e4 100%);
+    padding: 20px 32px 24px;
+    color: white;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .header-badge {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .header-sub {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .header-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 18px;
+  }
+  .tab-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    transition: background 0.15s;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    background: rgba(255,255,255,0.3);
+  }
+
+  .content { padding: 24px 32px; max-width: 1200px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .grid-12 {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e8eaf0;
+    padding: 16px 18px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6b7280;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .metric-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e8eaf0;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .metric-card.blue::before { background: #0074e4; }
+  .metric-card.green::before { background: #22c55e; }
+  .metric-card.amber::before { background: #f59e0b; }
+  .metric-card.red::before { background: #ef4444; }
+
+  .metric-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .metric-value {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    color: #111827;
+  }
+  .metric-sub {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+  }
+  .metric-icon {
+    position: absolute;
+    top: 14px; right: 14px;
+    font-size: 22px;
+    opacity: 0.15;
+  }
+
+  .severity-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .s0 { background: #dcfce7; color: #166534; }
+  .s1 { background: #dbeafe; color: #1e40af; }
+  .s2 { background: #fef3c7; color: #92400e; }
+  .s3 { background: #fee2e2; color: #991b1b; }
+
+  .chart-wrap { position: relative; }
+
+  .legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #f9fafb;
+    color: #374151;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f9fafb; }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #f0f2f5;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .confusion-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    font-size: 12px;
+  }
+  .cm-cell {
+    padding: 10px 6px;
+    text-align: center;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .cm-header {
+    background: #f8f9fa;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .cm-row-header {
+    background: #f8f9fa;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cm-high { background: #1d4ed8; color: white; }
+  .cm-mid { background: #60a5fa; color: white; }
+  .cm-low { background: #dbeafe; color: #1e3a8a; }
+  .cm-zero { background: #f8f9fa; color: #9ca3af; }
+
+  .epoch-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+  }
+  .epoch-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #1d4ed8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .epoch-best { background: #1d4ed8; color: white; }
+  .epoch-bar-wrap { flex: 1; }
+  .epoch-label { font-size: 11px; color: #9ca3af; margin-bottom: 2px; }
+  .epoch-bar { height: 5px; background: #eff6ff; border-radius: 3px; overflow: hidden; }
+  .epoch-fill { height: 100%; background: #3b82f6; border-radius: 3px; }
+  .epoch-fill.best { background: #1d4ed8; }
+  .epoch-val { font-size: 12px; font-weight: 600; color: #1d4ed8; width: 52px; text-align: right; }
+  .epoch-save { font-size: 11px; color: #22c55e; font-weight: 600; white-space: nowrap; }
+
+  .insight-box {
+    background: #f0f7ff;
+    border: 1px solid #bfdbfe;
+    border-left: 3px solid #2563eb;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #1e40af;
+    margin-top: 12px;
+  }
+  .insight-box strong { font-weight: 600; }
+
+  .compare-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .compare-label { font-size: 13px; color: #374151; width: 100px; flex-shrink: 0; }
+  .compare-track { flex: 1; height: 20px; background: #f3f4f6; border-radius: 4px; position: relative; overflow: hidden; }
+  .compare-fill-a { height: 100%; background: #94a3b8; border-radius: 4px 0 0 4px; position: absolute; top: 0; left: 0; }
+  .compare-fill-b { height: 100%; background: #2563eb; border-radius: 4px; position: absolute; top: 0; left: 0; transition: width 0.4s; }
+  .compare-vals { font-size: 12px; color: #6b7280; white-space: nowrap; }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .issue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .issue-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .issue-title { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 3px; }
+  .issue-desc { font-size: 12px; color: #6b7280; line-height: 1.5; }
+  .issue-count {
+    margin-left: auto;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .issue-pct { font-size: 16px; font-weight: 700; }
+  .issue-sub { font-size: 11px; color: #9ca3af; }
+
+  @media (max-width: 768px) {
+    .content { padding: 16px; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3, .grid-12 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1><i class="ti ti-shield-check" style="margin-right:7px; vertical-align:-2px;"></i>ZaloPay · Đánh giá Mức độ Hài lòng Khách hàng</h1>
+    <span class="header-badge">01/06/2025 – 01/06/2026</span>
+  </div>
+  <div class="header-sub">74,636 đánh giá · Google Play Store · Mô hình PhoBERT Fine-tuning</div>
+  <div class="header-tabs">
+    <button class="tab-btn active" onclick="showPage('overview', this)"><i class="ti ti-layout-dashboard" style="margin-right:5px;"></i>Tổng quan hài lòng</button>
+    <button class="tab-btn" onclick="showPage('model', this)"><i class="ti ti-brain" style="margin-right:5px;"></i>Hiệu suất mô hình</button>
+    <button class="tab-btn" onclick="showPage('issues', this)"><i class="ti ti-alert-triangle" style="margin-right:5px;"></i>Nguyên nhân không hài lòng</button>
+    <button class="tab-btn" onclick="showPage('compare', this)"><i class="ti ti-chart-bar" style="margin-right:5px;"></i>So sánh mô hình</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- PAGE 1: TỔNG QUAN MỨC ĐỘ HÀI LÒNG -->
+  <div class="page active" id="page-overview">
+    <div class="grid-4">
+      <div class="metric-card blue">
+        <i class="ti ti-messages metric-icon"></i>
+        <div class="metric-label">Tổng đánh giá</div>
+        <div class="metric-value">74,636</div>
+        <div class="metric-sub">Jun 2025 – Jun 2026</div>
+      </div>
+      <div class="metric-card green">
+        <i class="ti ti-star metric-icon"></i>
+        <div class="metric-label">Rating trung bình</div>
+        <div class="metric-value">4.59 ⭐</div>
+        <div class="metric-sub">83.6% đánh giá 5 sao</div>
+      </div>
+      <div class="metric-card amber">
+        <i class="ti ti-alert-circle metric-icon"></i>
+        <div class="metric-label">Tỷ lệ không hài lòng</div>
+        <div class="metric-value">~8.4%</div>
+        <div class="metric-sub">Severity 2 + 3</div>
+      </div>
+      <div class="metric-card red">
+        <i class="ti ti-flame metric-icon"></i>
+        <div class="metric-label">Tỷ lệ rất không hài lòng</div>
+        <div class="metric-value">~4.1%</div>
+        <div class="metric-sub">Cần xử lý ưu tiên</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-pie"></i> Phân bố mức độ hài lòng</div>
+        <div class="legend-row">
+          <span class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span>Bình thường (0)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Ít nghiêm trọng (1)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>Nghiêm trọng (2)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>Rất nghiêm trọng (3)</span>
+        </div>
+        <div class="chart-wrap" style="height:220px;">
+          <canvas id="pieChart" role="img" aria-label="Pie chart showing satisfaction distribution of ZaloPay reviews">Satisfied: 83.6%, Neutral: 8.0%, Dissatisfied: 4.1%, Very dissatisfied: 4.1%</canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-line"></i> Xu hướng đánh giá theo tháng</div>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="timeChart" role="img" aria-label="Line chart showing monthly review volume from June 2025 to June 2026">Review volume peaks in July 2025 and December 2025–January 2026.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-bar"></i> Phân bố theo Rating (mức độ hài lòng)</div>
+        <table>
+          <thead>
+            <tr><th>Rating</th><th>Số lượng</th><th>Tỷ lệ</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>⭐⭐⭐⭐⭐ 5 sao</td>
+              <td>62,400</td>
+              <td style="color:#22c55e; font-weight:600;">83.6%</td>
+              <td><div class="progress-bar"><div class="progress-fill" style="width:83.6%; background:#22c55e;"></div></div></td>
+            </tr>
+            <tr>
+              <td>⭐⭐⭐⭐ 4 sao</td>
+              <td>3,200</td>
+              <td style="color:#22c55e; font-weight:600;">4.3%</td>
+              <td><div class="progress-bar"><div class="progress-fill" style="width:4.3%; background:#86efac;"></div></div></td>
+            </tr>
+            <tr>
+              <td>⭐⭐⭐ 3 sao</td>
+              <td>2,800</td>
+              <td style="color:#3b82f6; font-weight:600;">3.7%</td>
+              <td><div class="progress-bar"><div class="progress-fill" style="width:3.7%; background:#3b82f6;"></div></div></td>
+            </tr>
+            <tr>
+              <td>⭐⭐ 2 sao</td>
+              <td>3,200</td>
+              <td style="color:#f59e0b; font-weight:600;">4.3%</td>
+              <td><div class="progress-bar"><div class="progress-fill" style="width:4.3%; background:#f59e0b;"></div></div></td>
+            </tr>
+            <tr>
+              <td>⭐ 1 sao</td>
+              <td>3,036</td>
+              <td style="color:#ef4444; font-weight:600;">4.1%</td>
+              <td><div class="progress-bar"><div class="progress-fill" style="width:4.1%; background:#ef4444;"></div></div></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="insight-box">
+          <strong>Lưu ý:</strong> Rating 4-5 sao → Bình thường (0) &nbsp;|&nbsp; 3 sao → Ít nghiêm trọng (1) &nbsp;|&nbsp; 2 sao → Nghiêm trọng (2) &nbsp;|&nbsp; 1 sao → Rất nghiêm trọng (3)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-ruler"></i> Độ dài review theo mức độ hài lòng</div>
+        <div class="chart-wrap" style="height:230px;">
+          <canvas id="boxBar" role="img" aria-label="Bar chart showing average review length by satisfaction level">Hài lòng avg 18 words, Trung bình avg 24 words, Không hài lòng avg 35 words, Rất không hài lòng avg 42 words.</canvas>
+        </div>
+        <div class="insight-box" style="margin-top:10px;">
+          <strong>Insight:</strong> Nhóm không hài lòng viết review dài gấp 2.3× nhóm hài lòng. Khách hàng có xu hướng diễn đạt chi tiết hơn khi bức xúc.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: HIỆU SUẤT MÔ HÌNH -->
+  <div class="page" id="page-model">
+    <div class="grid-4">
+      <div class="metric-card blue">
+        <i class="ti ti-target metric-icon"></i>
+        <div class="metric-label">Accuracy (PhoBERT)</div>
+        <div class="metric-value">87%</div>
+        <div class="metric-sub">+8% vs Baseline</div>
+      </div>
+      <div class="metric-card green">
+        <i class="ti ti-check metric-icon"></i>
+        <div class="metric-label">Macro F1-score</div>
+        <div class="metric-value">0.8696</div>
+        <div class="metric-sub">+7.75% vs TF-IDF</div>
+      </div>
+      <div class="metric-card amber">
+        <i class="ti ti-award metric-icon"></i>
+        <div class="metric-label">Precision (Rất nghiêm trọng)</div>
+        <div class="metric-value">0.97</div>
+        <div class="metric-sub">Độ chính xác cao nhất</div>
+      </div>
+      <div class="metric-card red">
+        <i class="ti ti-refresh metric-icon"></i>
+        <div class="metric-label">Recall (Nghiêm trọng)</div>
+        <div class="metric-value">0.85</div>
+        <div class="metric-sub">Phát hiện ý kiến tiêu cực</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-table"></i> Kết quả phân loại chi tiết – PhoBERT</div>
+        <table>
+          <thead>
+            <tr><th>Mức độ</th><th>Precision</th><th>Recall</th><th>F1-score</th><th>Support</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="severity-pill s0">Bình thường</span></td>
+              <td><strong>0.80</strong></td>
+              <td><strong>0.96</strong></td>
+              <td><strong>0.87</strong></td>
+              <td>144</td>
+            </tr>
+            <tr>
+              <td><span class="severity-pill s1">Ít nghiêm trọng</span></td>
+              <td><strong>0.88</strong></td>
+              <td><strong>0.89</strong></td>
+              <td><strong>0.89</strong></td>
+              <td>144</td>
+            </tr>
+            <tr>
+              <td><span class="severity-pill s2">Nghiêm trọng</span></td>
+              <td><strong>0.86</strong></td>
+              <td><strong>0.85</strong></td>
+              <td><strong>0.86</strong></td>
+              <td>144</td>
+            </tr>
+            <tr>
+              <td><span class="severity-pill s3">Rất nghiêm trọng</span></td>
+              <td style="color:#1d4ed8; font-weight:700;">0.97</td>
+              <td><strong>0.78</strong></td>
+              <td><strong>0.86</strong></td>
+              <td>144</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="insight-box">
+          <strong>Precision 0.97 ở mức Rất nghiêm trọng:</strong> Trong 100 cảnh báo "Rất nghiêm trọng", 97 là chính xác – giảm thiểu cảnh báo sai hiệu quả.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-grid-dots"></i> Confusion Matrix – PhoBERT (%)</div>
+        <div style="font-size:11px; color:#9ca3af; margin-bottom:8px; text-align:center;">Hàng = Thực tế · Cột = Dự đoán</div>
+        <div class="confusion-grid">
+          <div class="cm-cell cm-header"></div>
+          <div class="cm-cell cm-header">Bình thường</div>
+          <div class="cm-cell cm-header">Ít NT</div>
+          <div class="cm-cell cm-header">NT</div>
+          <div class="cm-cell cm-header">Rất NT</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">Bình<br>thường</div>
+          <div class="cm-cell cm-high">96.5</div>
+          <div class="cm-cell cm-zero">1.4</div>
+          <div class="cm-cell cm-zero">1.4</div>
+          <div class="cm-cell cm-zero">0.7</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">Ít<br>NT</div>
+          <div class="cm-cell cm-zero">4.9</div>
+          <div class="cm-cell cm-high">88.9</div>
+          <div class="cm-cell cm-zero">2.8</div>
+          <div class="cm-cell cm-zero">3.4</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">NT</div>
+          <div class="cm-cell cm-zero">4.9</div>
+          <div class="cm-cell cm-zero">3.5</div>
+          <div class="cm-cell cm-high">84.7</div>
+          <div class="cm-cell cm-zero">6.9</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">Rất<br>NT</div>
+          <div class="cm-cell cm-zero">2.1</div>
+          <div class="cm-cell cm-zero">9.7</div>
+          <div class="cm-cell cm-zero">10.4</div>
+          <div class="cm-cell cm-mid">77.8</div>
+        </div>
+        <div style="margin-top:10px; font-size:11px; color:#9ca3af; text-align:center;">NT = Nghiêm trọng</div>
+      </div>
+    </div>
+
+    <div class="grid-12">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-trending-up"></i> Lịch sử huấn luyện – 7 Epochs</div>
+        <div id="epochList"></div>
+        <div class="chart-wrap" style="height:180px; margin-top:14px;">
+          <canvas id="trainChart" role="img" aria-label="Line chart showing training loss and validation F1 across 7 epochs">Training loss decreases from 1.18 to 0.24. Val F1 increases from 0.59 to 0.86.</canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-radar"></i> F1-score theo từng mức độ</div>
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="f1Chart" role="img" aria-label="Grouped bar chart comparing F1-scores between TF-IDF and PhoBERT models">PhoBERT outperforms TF-IDF on all four satisfaction levels.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: NGUYÊN NHÂN KHÔNG HÀI LÒNG -->
+  <div class="page" id="page-issues">
+    <div class="grid-4">
+      <div class="metric-card red">
+        <i class="ti ti-currency-dollar metric-icon"></i>
+        <div class="metric-label">Lỗi giao dịch tài chính</div>
+        <div class="metric-value">38%</div>
+        <div class="metric-sub">Nguyên nhân hàng đầu</div>
+      </div>
+      <div class="metric-card amber">
+        <i class="ti ti-link metric-icon"></i>
+        <div class="metric-label">Liên kết ngân hàng</div>
+        <div class="metric-value">24%</div>
+        <div class="metric-sub">Không hài lòng cao</div>
+      </div>
+      <div class="metric-card blue">
+        <i class="ti ti-lock metric-icon"></i>
+        <div class="metric-label">Xác thực & bảo mật</div>
+        <div class="metric-value">18%</div>
+        <div class="metric-sub">OTP, KYC</div>
+      </div>
+      <div class="metric-card green">
+        <i class="ti ti-device-mobile metric-icon"></i>
+        <div class="metric-label">Hiệu suất ứng dụng</div>
+        <div class="metric-value">20%</div>
+        <div class="metric-sub">Lag, crash, chậm</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-alert-triangle"></i> Top nguyên nhân không hài lòng</div>
+        <div class="issue-item">
+          <div class="issue-icon" style="background:#fee2e2; color:#dc2626;">
+            <i class="ti ti-transfer"></i>
+          </div>
+          <div>
+            <div class="issue-title">Lỗi chuyển tiền & trạng thái giao dịch</div>
+            <div class="issue-desc">Tiền bị trừ nhưng chưa đến tay người nhận. Giao dịch treo không rõ kết quả.</div>
+          </div>
+          <div class="issue-count">
+            <div class="issue-pct" style="color:#dc2626;">38%</div>
+            <div class="issue-sub">Rất nghiêm trọng</div>
+          </div>
+        </div>
+        <div class="issue-item">
+          <div class="issue-icon" style="background:#fef3c7; color:#d97706;">
+            <i class="ti ti-credit-card"></i>
+          </div>
+          <div>
+            <div class="issue-title">Lỗi thanh toán & liên kết ngân hàng</div>
+            <div class="issue-desc">QR không nhận, nạp tiền thất bại, mất trạng thái kết nối thẻ.</div>
+          </div>
+          <div class="issue-count">
+            <div class="issue-pct" style="color:#d97706;">24%</div>
+            <div class="issue-sub">Không hài lòng - Rất</div>
+          </div>
+        </div>
+        <div class="issue-item">
+          <div class="issue-icon" style="background:#dbeafe; color:#2563eb;">
+            <i class="ti ti-lock"></i>
+          </div>
+          <div>
+            <div class="issue-title">Xác thực tài khoản & OTP</div>
+            <div class="issue-desc">Không nhận OTP, xác minh danh tính thất bại nhiều lần, khóa tài khoản.</div>
+          </div>
+          <div class="issue-count">
+            <div class="issue-pct" style="color:#2563eb;">18%</div>
+            <div class="issue-sub">Không hài lòng</div>
+          </div>
+        </div>
+        <div class="issue-item">
+          <div class="issue-icon" style="background:#f0fdf4; color:#16a34a;">
+            <i class="ti ti-device-mobile"></i>
+          </div>
+          <div>
+            <div class="issue-title">Hiệu suất & ổn định ứng dụng</div>
+            <div class="issue-desc">App lag, crash, tính năng hỏng sau cập nhật, tốc độ phản hồi chậm.</div>
+          </div>
+          <div class="issue-count">
+            <div class="issue-pct" style="color:#16a34a;">20%</div>
+            <div class="issue-sub">Trung bình - Không</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-donut"></i> Phân bố nguyên nhân theo mức độ không hài lòng</div>
+        <div class="chart-wrap" style="height:220px;">
+          <canvas id="issueChart" role="img" aria-label="Stacked bar chart showing issue categories by dissatisfaction level">Transaction errors dominate very dissatisfied. App performance issues appear mostly in dissatisfied/neutral.</canvas>
+        </div>
+        <div class="legend-row" style="margin-top:10px;">
+          <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>Giao dịch</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>Liên kết NH</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Xác thực</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span>Hiệu suất</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="ti ti-quote"></i> Ví dụ phản hồi phân loại theo mức độ hài lòng</div>
+      <table>
+        <thead>
+          <tr><th style="width:50%">Nội dung phản hồi</th><th>Mức độ thực tế</th><th>Dự đoán AI</th><th>Ghi chú</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-style:italic; color:#374151;">"App mượt mà, thanh toán nhanh, rất tiện"</td>
+            <td><span class="severity-pill s0">Bình thường</span></td>
+            <td><span class="severity-pill s0">Bình thường</span></td>
+            <td style="color:#22c55e; font-size:12px;">✓ Chính xác</td>
+          </tr>
+          <tr>
+            <td style="font-style:italic; color:#374151;">"Chuyển tiền lỗi, tiền chưa về tài khoản đã 3 ngày"</td>
+            <td><span class="severity-pill s3">Rất nghiêm trọng</span></td>
+            <td><span class="severity-pill s3">Rất nghiêm trọng</span></td>
+            <td style="color:#22c55e; font-size:12px;">✓ Chính xác</td>
+          </tr>
+          <tr>
+            <td style="font-style:italic; color:#374151;">"Không mất tiền nhưng app quá chậm"</td>
+            <td><span class="severity-pill s1">Ít nghiêm trọng</span></td>
+            <td><span class="severity-pill s1">Ít nghiêm trọng</span></td>
+            <td style="color:#22c55e; font-size:12px;">✓ Phân biệt phủ định</td>
+          </tr>
+          <tr>
+            <td style="font-style:italic; color:#374151;">"nay đớp 60k của bố" (ngôn ngữ mạng)</td>
+            <td><span class="severity-pill s3">Rất nghiêm trọng</span></td>
+            <td><span class="severity-pill s0">Bình thường</span></td>
+            <td style="color:#ef4444; font-size:12px;">✗ Sai – teencode ẩn ý</td>
+          </tr>
+          <tr>
+            <td style="font-style:italic; color:#374151;">"10/10 👍 tuyệt vời" (mỉa mai)</td>
+            <td><span class="severity-pill s3">Rất nghiêm trọng</span></td>
+            <td><span class="severity-pill s0">Bình thường</span></td>
+            <td style="color:#ef4444; font-size:12px;">✗ Sai – sarcasm</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGE 4: SO SÁNH MÔ HÌNH -->
+  <div class="page" id="page-compare">
+    <div class="grid-4">
+      <div class="metric-card blue">
+        <div class="metric-label">TF-IDF Accuracy</div>
+        <div class="metric-value">79%</div>
+        <div class="metric-sub">Logistic Regression</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-label">PhoBERT Accuracy</div>
+        <div class="metric-value">87%</div>
+        <div class="metric-sub">Fine-tuned Transformer</div>
+      </div>
+      <div class="metric-card amber">
+        <div class="metric-label">Cải thiện Accuracy</div>
+        <div class="metric-value">+8%</div>
+        <div class="metric-sub">PhoBERT vượt trội</div>
+      </div>
+      <div class="metric-card red">
+        <div class="metric-label">Cải thiện F1 Macro</div>
+        <div class="metric-value">+7.75%</div>
+        <div class="metric-sub">0.7921 → 0.8696</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-scale"></i> So sánh chỉ số tổng thể</div>
+        <div style="margin-bottom:6px;">
+          <div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">
+            <span style="display:inline-flex; align-items:center; gap:4px; margin-right:16px;"><span style="width:10px; height:10px; background:#94a3b8; border-radius:2px; display:inline-block;"></span>TF-IDF + LR</span>
+            <span style="display:inline-flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#2563eb; border-radius:2px; display:inline-block;"></span>PhoBERT</span>
+          </div>
+        </div>
+        <div id="compareMetrics"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-table"></i> Confusion Matrix – TF-IDF (%)</div>
+        <div style="font-size:11px; color:#9ca3af; margin-bottom:8px; text-align:center;">Hàng = Thực tế · Cột = Dự đoán</div>
+        <div class="confusion-grid">
+          <div class="cm-cell cm-header"></div>
+          <div class="cm-cell cm-header">Bình thường</div>
+          <div class="cm-cell cm-header">Ít NT</div>
+          <div class="cm-cell cm-header">NT</div>
+          <div class="cm-cell cm-header">Rất NT</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">Bình<br>thường</div>
+          <div class="cm-cell cm-mid">85.0</div>
+          <div class="cm-cell cm-zero">5.0</div>
+          <div class="cm-cell cm-zero">2.5</div>
+          <div class="cm-cell cm-zero">7.5</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">Ít<br>NT</div>
+          <div class="cm-cell cm-zero">14.0</div>
+          <div class="cm-cell cm-mid">72.0</div>
+          <div class="cm-cell cm-zero">7.0</div>
+          <div class="cm-cell cm-zero">7.0</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">NT</div>
+          <div class="cm-cell cm-zero">5.0</div>
+          <div class="cm-cell cm-zero">3.5</div>
+          <div class="cm-cell cm-mid">84.0</div>
+          <div class="cm-cell cm-zero">7.5</div>
+
+          <div class="cm-cell cm-row-header" style="font-size:10px;">Rất<br>NT</div>
+          <div class="cm-cell cm-zero">4.0</div>
+          <div class="cm-cell cm-zero">8.0</div>
+          <div class="cm-cell cm-zero">12.0</div>
+          <div class="cm-cell cm-mid">76.0</div>
+        </div>
+        <div class="insight-box" style="margin-top:12px;">
+          <strong>PhoBERT vs TF-IDF ở mức Rất nghiêm trọng:</strong> Recall 78% vs 76%. Precision PhoBERT đạt 0.97 vs TF-IDF 0.74 – giảm cảnh báo sai gần 3 lần.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar"></i> So sánh F1-score theo từng mức độ hài lòng</div>
+      <div class="chart-wrap" style="height:240px;">
+        <canvas id="compareBarChart" role="img" aria-label="Grouped bar chart comparing F1-scores between TF-IDF+LR and PhoBERT across four satisfaction levels">PhoBERT consistently outperforms TF-IDF across all levels.</canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+const PIE_COLORS = ['#22c55e','#3b82f6','#f59e0b','#ef4444'];
+
+new Chart(document.getElementById('pieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Bình thường (0)', 'Ít nghiêm trọng (1)', 'Nghiêm trọng (2)', 'Rất nghiêm trọng (3)'],
+    datasets: [{
+      data: [87.9, 3.7, 4.3, 4.1],
+      backgroundColor: PIE_COLORS,
+      borderWidth: 2,
+      borderColor: '#ffffff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } }
+  }
+});
+
+const months = ['T6/25','T7/25','T8/25','T9/25','T10/25','T11/25','T12/25','T1/26','T2/26','T3/26','T4/26','T5/26'];
+const reviews = [3800, 6200, 4100, 5800, 4200, 4700, 8500, 9200, 5600, 1800, 1200, 800];
+const sevReviews = [310, 510, 340, 480, 345, 385, 700, 755, 460, 148, 98, 66];
+
+new Chart(document.getElementById('timeChart'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'Tổng review',
+        data: reviews,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.08)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Không hài lòng (2+3)',
+        data: sevReviews,
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.06)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        borderDash: [4,3],
+        yAxisID: 'y1'
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { position: 'left', grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } },
+      y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 11 }, color: '#ef4444' } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 0 } }
+    }
+  }
+});
+
+new Chart(document.getElementById('boxBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Bình thường', 'Ít nghiêm trọng', 'Nghiêm trọng', 'Rất nghiêm trọng'],
+    datasets: [{
+      label: 'Số từ TB',
+      data: [18, 24, 35, 42],
+      backgroundColor: ['#22c55e','#3b82f6','#f59e0b','#ef4444'],
+      borderRadius: 5,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+const epochData = [
+  { epoch: 1, loss: 1.1759, f1: 0.5986 },
+  { epoch: 2, loss: 0.8426, f1: 0.7579 },
+  { epoch: 3, loss: 0.5604, f1: 0.7835 },
+  { epoch: 4, loss: 0.4006, f1: 0.8278 },
+  { epoch: 5, loss: 0.3145, f1: 0.8226 },
+  { epoch: 6, loss: 0.2760, f1: 0.8429 },
+  { epoch: 7, loss: 0.2440, f1: 0.8449 },
+];
+const epochList = document.getElementById('epochList');
+epochData.forEach(e => {
+  const isBest = e.epoch === 7;
+  const pct = ((e.f1 - 0.5) / 0.4 * 100).toFixed(0);
+  epochList.innerHTML += `<div class="epoch-row">
+    <div class="epoch-num ${isBest ? 'epoch-best' : ''}">${e.epoch}</div>
+    <div class="epoch-bar-wrap">
+      <div class="epoch-label">Val F1 Macro: ${e.f1.toFixed(4)}</div>
+      <div class="epoch-bar"><div class="epoch-fill ${isBest ? 'best' : ''}" style="width:${pct}%;"></div></div>
+    </div>
+    <div class="epoch-val">${e.f1.toFixed(4)}</div>
+    <div class="epoch-save">${isBest ? '★ Best' : '✓ Saved'}</div>
+  </div>`;
+});
+
+new Chart(document.getElementById('trainChart'), {
+  type: 'line',
+  data: {
+    labels: epochData.map(e => 'E' + e.epoch),
+    datasets: [
+      {
+        label: 'Train Loss',
+        data: epochData.map(e => e.loss),
+        borderColor: '#f59e0b',
+        tension: 0.3,
+        pointRadius: 4,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Val F1 Macro',
+        data: epochData.map(e => e.f1),
+        borderColor: '#22c55e',
+        tension: 0.3,
+        pointRadius: 4,
+        yAxisID: 'y1'
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { position: 'left', ticks: { font: { size: 10 } }, grid: { color: '#f3f4f6' } },
+      y1: { position: 'right', ticks: { font: { size: 10 }, color: '#22c55e' }, grid: { drawOnChartArea: false } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('f1Chart'), {
+  type: 'bar',
+  data: {
+    labels: ['Bình thường', 'Ít nghiêm trọng', 'Nghiêm trọng', 'Rất nghiêm trọng'],
+    datasets: [
+      {
+        label: 'TF-IDF + LR',
+        data: [0.81, 0.77, 0.84, 0.75],
+        backgroundColor: '#94a3b8',
+        borderRadius: 4
+      },
+      {
+        label: 'PhoBERT',
+        data: [0.87, 0.89, 0.86, 0.86],
+        backgroundColor: '#2563eb',
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { min: 0.6, max: 1.0, grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('issueChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Không hài lòng', 'Rất không hài lòng'],
+    datasets: [
+      { label: 'Giao dịch', data: [32, 45], backgroundColor: '#ef4444', borderRadius: 3 },
+      { label: 'Liên kết NH', data: [28, 20], backgroundColor: '#f59e0b', borderRadius: 3 },
+      { label: 'Xác thực', data: [22, 18], backgroundColor: '#3b82f6', borderRadius: 3 },
+      { label: 'Hiệu suất', data: [18, 17], backgroundColor: '#22c55e', borderRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+const cmpMetrics = [
+  { label: 'Accuracy', a: 79, b: 87 },
+  { label: 'Macro Precision', a: 79, b: 88 },
+  { label: 'Macro Recall', a: 79, b: 87 },
+  { label: 'Macro F1-score', a: 79.2, b: 86.9 },
+  { label: 'Weighted F1', a: 80, b: 85 },
+];
+const cmpDiv = document.getElementById('compareMetrics');
+cmpMetrics.forEach(m => {
+  cmpDiv.innerHTML += `<div class="compare-bar">
+    <div class="compare-label" style="font-size:12px;">${m.label}</div>
+    <div style="flex:1;">
+      <div style="height:20px; background:#f3f4f6; border-radius:4px; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:0; left:0; height:100%; width:${m.a}%; background:#94a3b8; border-radius:4px; opacity:0.7;"></div>
+        <div style="position:absolute; top:0; left:0; height:100%; width:${m.b}%; background:#2563eb; border-radius:4px; opacity:0.5;"></div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:#6b7280; white-space:nowrap; min-width:100px; text-align:right;">
+      <span style="color:#94a3b8;">${m.a.toFixed(1)}%</span> → <span style="color:#2563eb; font-weight:600;">${m.b.toFixed(1)}%</span>
+    </div>
+  </div>`;
+});
+
+new Chart(document.getElementById('compareBarChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Bình thường', 'Ít nghiêm trọng', 'Nghiêm trọng', 'Rất nghiêm trọng'],
+    datasets: [
+      {
+        label: 'TF-IDF + LR',
+        data: [0.81, 0.77, 0.84, 0.75],
+        backgroundColor: '#94a3b8',
+        borderRadius: 5
+      },
+      {
+        label: 'PhoBERT Fine-tuned',
+        data: [0.87, 0.89, 0.86, 0.86],
+        backgroundColor: '#2563eb',
+        borderRadius: 5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(2)}`
+        }
+      }
+    },
+    scales: {
+      y: { min: 0.65, max: 1.0, grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 12 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>l>
