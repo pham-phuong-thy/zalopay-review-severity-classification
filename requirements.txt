@@ -1,1 +1,29 @@
+# Data Collection
+requests
+google-play-scraper
 
+# Data Processing
+pandas
+numpy
+openpyxl
+
+# Vietnamese NLP Preprocessing
+underthesea
+pyvi
+emoji
+
+# Machine Learning
+scikit-learn
+imbalanced-learn
+
+# Deep Learning & Transformer
+torch
+transformers
+
+# Visualization
+matplotlib
+seaborn
+wordcloud
+
+# Utilities
+tqdm
